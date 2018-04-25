@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>要素图层按需显示</title>
+    <link rel="stylesheet" href="http://192.168.10.251/arcgis_js_api/library/3.23/3.23/esri/css/esri.css">
+    <link rel="stylesheet" href="http://192.168.10.251/arcgis_js_api/library/3.23/3.23/dijit/themes/tundra/tundra.css">
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #borderContainer {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script type="text/javascript">
+
+        dojoConfig = { parseOnLoad: true };
+    </script>
+    <link href="http://192.168.10.251/arcgis_js_api/library/3.23/3.23/dijit/themes/claro/claro.css" rel="stylesheet" />
+    <script type="text/javascript" src="http://192.168.10.251/arcgis_js_api/library/3.23/3.23/init.js"></script>
+    <script type="text/javascript">
+
+        var Map;
+		var FeatureLayer;
+		var InfoTemplate;
+		require(["dojo/parser",
+		"dijit/layout/ContentPane",
+		"dijit/layout/BorderContainer",
+		"esri/map",
+		"esri/layers/ArcGISTiledMapServiceLayer",
+		"esri/layers/FeatureLayer",
+		"dojo/colors",
+		"esri/symbols/TextSymbol",
+		"esri/InfoTemplate",
+		"esri/symbols/Font",
+		"dojo/domReady!"],function(){
+			wkid=4326;
+		    font=new esri.symbol.Font();
+		    font.setSize("10pt");
+		    font.setFamily("宋体");
+
+	        //定义初始范围
+		    // var startExtent = new esri.geometry.Extent({
+		    //    "xmin": 70.274747,
+		    //    "ymin": 0.901097,
+		    //    "xmax": 139.053125,
+		    //    "ymax": 57.068121,
+		    //    "spatialReference": {"wkid":wkid}
+		    // });
+		    Map = new esri.Map("map");
+		    var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://192.168.10.251:6080/arcgis/rest/services/JsTileMap/MapServer");
+		    Map.addLayer(layer);
+
+		    InfoTemplate = new esri.InfoTemplate("${name}", "名称:${name}");
+
+            //定义显示模式
+		    var ftLayer = {
+		        mode: esri.layers.FeatureLayer.MODE_ONDEMAND,
+		        infoTemplate: InfoTemplate,
+                outFields:["*"]
+		    };
+		    FeatureLayer = new esri.layers.FeatureLayer("http://192.168.10.251:6080/arcgis/rest/services/JsMap/MapServer/0", ftLayer);
+		    FeatureLayer.isVisible = true;
+		    Map.addLayer(FeatureLayer);
+		    FeatureLayer.setDefinitionExpression("name like ''");
+		    dojo.connect(Map, 'onLoad', function (theMap) {
+		        dojo.connect(dijit.byId('map'), 'resize', MapResize);
+		    });
+		    dojo.connect(FeatureLayer, "onUpdateEnd", MapUpdateEnd);
+
+			 function MapResize() {
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(function () {
+                Map.resize();
+                Map.repisition();
+            }, 500);}
+
+			function MapUpdateEnd(error) {
+				if (FeatureLayer.graphics.length > 0) {
+                Map.graphics.clear();
+                var htmls = "<table style=\"width:100%\"><tr>";
+                htmls = htmls + "<td>查询结果</td>";
+                htmls = htmls + "</tr></table>";
+                htmls = "";
+                htmls = htmls + "<table style=\"width:100%\">";
+                for (var i = 0; i < FeatureLayer.graphics.length; i++) {
+                    var graphic = FeatureLayer.graphics[i];
+                    var geometry = graphic.geometry;
+                    var PoiName = graphic.attributes["name"];
+                    if (i % 2 == 0) htmls = htmls + "<tr>";
+                    else htmls = htmls + "<tr bgcolor=\"#F0F0F0\">";
+                    htmls = htmls + "<td>" + PoiName + "</td>";
+                    htmls = htmls + "</tr>";
+
+                    var textSymbol = new esri.symbol.TextSymbol(PoiName);
+                    textSymbol.setColor(new dojo.Color([128, 0, 0]));
+                    textSymbol.setFont(font);
+                    textSymbol.setOffset(0, 10);
+                    var graphicText = esri.Graphic(graphic.toJson());
+                    graphicText.setSymbol(textSymbol);
+                    Map.graphics.add(graphicText);
+                }
+                htmls = htmls + "</table>";
+                document.getElementById("divShowResult").style.overflow = "scroll";
+                document.getElementById("divShowResult").innerHTML = htmls;
+            }
+            else
+                document.getElementById("divShowResult").innerHTML = "";
+        }
+		});
+
+        //查询按钮触发函数
+        function QueryFeatureLayer(event) {
+            var queryName = document.getElementById("txtName").value;
+            if (queryName == "") return;
+            var whereStr = "name like '%" + queryName + "%'";
+            FeatureLayer.setDefinitionExpression(whereStr);
+        }
+
+    </script>
+</head>
+<body class="claro">
+    <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:true,liveSplitters:false"
+         id="borderContainer">
+        <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'right'">
+            名称：<input type="text" id="txtName" />
+            <input type="button" value="确定" onclick="QueryFeatureLayer()" />
+            <div id="divShowResult"></div>
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'" id="map">
+        </div>
+    </div>
+</body>
+</html>  
