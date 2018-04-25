@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>地图联动</title>
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/dijit/themes/tundra/tundra.css"/>
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/esri/css/esri.css" />
+   <link rel="stylesheet" href="http://localhost/arcgis_js_api/library/3.23/3.23/dijit/themes/claro/claro.css" /> 
+   <script src="http://localhost/arcgis_js_api/library/3.23/3.23/dojo/dojo.js" djConfig="parseOnLoad:true"></script>
+   <script type="text/javascript" src="http://localhost/arcgis_js_api/library/3.23/3.23/init.js"></script>
+ 
+<style>
+html, body, #mystackContainer {
+    height:100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+#stackController{
+position:absolute;
+bottom:20px;
+left:20px;
+}
+
+</style>
+ 
+<script>
+    require(["esri/map",
+			"dijit/layout/StackController",
+			"dijit/layout/StackContainer",
+			"dijit/layout/ContentPane",
+			"esri/dijit/OverviewMap",
+			"esri/dijit/Scalebar",
+			"dijit/dijit",
+			"esri/layers/ArcGISTiledMapServiceLayer",
+			"dojo/on",
+			"dojo/domReady!"],
+			function(){
+			var stack=new dijit.layout.StackContainer({
+				id:"mystackContainer"
+			},"stackContainer")
+			var Content_StreetMap=new dijit.layout.ContentPane({
+				title:"街景图",
+				region:"center"
+			},dojo.create("div",{id:"Streets"}))
+			stack.addChild(Content_StreetMap);
+			var Content_Imagery=new dijit.layout.ContentPane({
+				title:"影像图"
+			},dojo.create("div",{id:"Imagery"}));
+			stack.addChild(Content_Imagery);
+			var Content_Topo=new dijit.layout.ContentPane({
+				title:"地形图"
+			},dojo.create("div",{id:"Topo"}));
+			stack.addChild(Content_Topo);
+			var controller=new dijit.layout.StackController({containerId:"mystackContainer"},"stackController");
+			
+			stack.startup();
+			controller.startup();
+			
+			var map_StreetMap=new esri.Map("Streets",{
+				center: [116.354524,39.996876],
+				zoom: 8
+			})
+			var layer_StreetMap=new esri.layers.ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer")
+			map_StreetMap.addLayer(layer_StreetMap);
+			var map_Imagery=new esri.Map("Imagery",{
+				center: [116.354524,39.996876],
+				zoom: 8
+			})
+			var layer_Imagery=new esri.layers.ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer");
+			map_Imagery.addLayer(layer_Imagery);
+			var map_Topo=new esri.Map("Topo",{
+				center: [116.354524,39.996876],
+				zoom: 8
+			})
+			var layer_Topo=new esri.layers.ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/NGS_Topo_US_2D/MapServer");
+			map_Topo.addLayer(layer_Topo);
+			//比例尺
+			<!-- var scalebar = new esri.dijit.Scalebar({ -->
+				<!-- map: map, -->
+				<!-- attachTo: "bottom-left", -->
+				<!-- width:10, -->
+				<!-- scalebarUnit: "dual" -->
+			<!-- }); -->
+			
+			})
+
+			
+		
+
+</script>
+</head>
+<body class="claro">
+    <div id="stackContainer"></div>
+	<div id="stackController"></div>
+</body>
+</html>
