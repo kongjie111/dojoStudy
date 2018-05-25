@@ -44,11 +44,12 @@ html, body, #map {
 			"dojo/on",
 			"dojo/aspect"],
 			function(Map,BasemapToggle,HomeButton,OverviewMap,Scalebar,on,aspect){
-			var map;
-			var overviewMap;
-			
-			loadOverMap("streets");
-
+			var map=new esri.Map("map", {
+				center: [116.354524,39.996876],
+				zoom: 8,
+				basemap: "streets"
+			});
+			loadOverMap();
 			//卫星图切换   
 			var toggle = new esri.dijit.BasemapToggle({
 				map: map,
@@ -75,16 +76,11 @@ html, body, #map {
 				width:10,
 				scalebarUnit: "dual"
 			});
-			function loadOverMap(basemap1){
-			map=new esri.Map("map", {
-				center: [116.354524,39.996876],
-				zoom: 8,
-				basemap: basemap1.toString()
+			var a=on(map,"basemap-change",function(){
+			loadOverMap();
 			});
-			//alert(map.getBasemap());
-			//鹰眼小地图 
-			//alert(dijit.byId("overviewMap"));
-			overviewMap = new esri.dijit.OverviewMap({
+			function loadOverMap(){
+			var overviewMap= new esri.dijit.OverviewMap({
 				map: map,
 				visible: true,           // 初始化可见，默认为false  
 				attachTo: "bottom-left",   // 默认右上角  
@@ -94,21 +90,9 @@ html, body, #map {
 				maximizeButton: true,    // 最大化,最小化按钮，默认false  
 				expandFactor: 2,         //概览地图和总览图上显示的程度矩形的大小之间的比例。默认值是2，这意味着概览地图将至少是两倍的大小的程度矩形。  
 				color: "#000000",         // 默认颜色为#000000  
-				//id:"overviewMap"
 			});
 			overviewMap.startup();
-			//alert(dijit.byId("overviewMap").map.getBasemap());
 			}
-			
-			var b=on(map,"basemap-change",function(event){
-				var bg=event.target.getBasemap();
-				<!-- alert(bg); -->
-				loadOverMap(bg);
-			});
-			
-			<!-- var a=on(dijit.byId("BasemapToggle"),"toggle",function(){ -->
-			<!-- loadOverMap(dijit.byId("BasemapToggle").basemap) -->
-			<!-- }); -->
 			})
 
 			
