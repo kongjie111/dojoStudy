@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html >
+<head>
+
+    <script type="text/javascript">
+        dojoConfig = { parseOnLoad: true };
+    </script>
+	<link href="http://localhost/arcgis_js_api/library/3.23/3.23/dojox/grid/resources/claroGrid.css" rel="stylesheet" />
+		<style type="text/css">
+
+#gridDiv {
+    height: 75em;
+	width:57.5em;
+}
+	</style>
+    <link href="http://localhost/arcgis_js_api/library/3.23/3.23/dijit/themes/claro/claro.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/dijit/themes/tundra/tundra.css" />
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/esri/css/esri.css" />
+    <script type="text/javascript" src="http://localhost/arcgis_js_api/library/3.23/3.23/init.js"></script>
+	<script>
+  require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojo/dom', 'dojo/domReady!'],
+    function(lang, DataGrid, ItemFileWriteStore, dom){
+
+                var data = {
+                    identifier: "id",
+                    items:[
+{ id: 1, col2: '0.31', col3: '949', col4: '150.5', col5: '357.75', col6: '186.75', col7: '357.74', col8: '186.45', col9: '-0.01', col10: '-0.3' }, { id: 2, col2: '0.96', col3: '758.75', col4: '828.25', col5: '334.5', col6: '433.25', col7: '333.76', col8: '432.64', col9: '-0.74', col10: '-0.61' }
+                    ]
+                };
+
+                var store = new ItemFileWriteStore({ data: data });
+
+                var layout = [[
+                                { 'name': 'id', 'field': 'id', 'width': '10px'},
+                                { 'name': 'RMS', 'field': 'col2', 'width': '20px' },
+                                { 'name': 'Base X', 'field': 'col3', 'width': '20px' },
+                                { 'name': 'Base Y', 'field': 'col4', 'width': '20px' },
+                                { 'name': 'Warp X', 'field': 'col5', 'width': '20px' },
+                                { 'name': 'Warp Y', 'field': 'col6', 'width': '20px' },
+                                { 'name': 'Predict X', 'field': 'col7', 'width': '20px' },
+                                { 'name': 'Predict Y', 'field': 'col8', 'width': '20px' },
+                                { 'name': 'Error X', 'field': 'col9', 'width': '20px' },
+                                { 'name': 'Error Y', 'field': 'col10', 'width': '20px' }
+                ]];
+
+                var grid = new DataGrid({
+                    id: 'grid',
+                    store: store,
+                    structure: layout,
+                    rowSelector: '4px'});
+
+                /*append the new grid to the div*/
+                grid.placeAt("gridDiv");
+
+                /*Call startup() to render the grid*/
+                grid.startup();
+        });
+    </script>
+</head>
+<body class="claro">
+    <div id="gridDiv"></div>
+</body>
+</html>
