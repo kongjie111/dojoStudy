@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>地图联动</title>
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/dijit/themes/tundra/tundra.css"/>
+    <link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_api/library/3.23/3.23/esri/css/esri.css" />
+    <script type="text/javascript" src="http://localhost/arcgis_js_api/library/3.23/3.23/init.js"></script>
+ 
+<style>
+html, body, #map {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+#BasemapToggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 50;
+}
+#HomeButton {
+    position: absolute;
+    top: 95px;
+    left: 20px;
+    z-index: 50;
+}
+#BasemapImagery{
+	position:absolute;
+	top:20px;
+	right:100px;
+	z-index:50;
+}
+</style>
+ 
+<script>
+    require(["esri/map",
+			"dojo/dom-prop",
+			"esri/dijit/BasemapToggle",
+			"esri/dijit/HomeButton",
+			"esri/dijit/OverviewMap",
+			"esri/dijit/Scalebar",
+			"dojo/on",
+			"esri/basemaps"],
+			function(Map,domProp,BasemapToggle,HomeButton,OverviewMap,Scalebar,on,esriBasemaps){
+			var map;
+			var overviewMap;
+			var i=0;
+			
+			esri.basemaps.street={
+			baseMapLayers: [{ url: "http://services.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer" }],
+						//thumbnailUrl:"C:/inetpub/wwwroot/arcgis_js_api/library/3.23/3.23/esri/images/basemap/dark-gray.jpg",
+						title: "街道"
+			}
+			esri.basemaps.Image={
+			baseMapLayers:[{url:"http://services.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer"}],
+			title:"影像"
+			}
+			esri.basemaps.NGSTopo={
+			baseMapLayers:[{url:"http://services.arcgisonline.com/ArcGIS/rest/services/NGS_Topo_US_2D/MapServer"}],
+			title:"地形"
+			}
+			loadOverMap("street");
+			//卫星图切换   
+			var toggle = new esri.dijit.BasemapToggle({
+				map: map,
+				basemap: "Image"
+				}, "BasemapToggle");
+			toggle.startup();
+		
+			//地形图切换
+			var Imagery=new esri.dijit.BasemapToggle({
+				map:map,
+				basemap:"NGSTopo"
+			},"BasemapImagery")
+			Imagery.startup();
+		
+			//HOME按钮
+			var home = new esri.dijit.HomeButton({
+				map: map
+			}, "HomeButton");
+			home.startup();
+			//比例尺
+			var scalebar = new esri.dijit.Scalebar({
+				map: map,
+				attachTo: "bottom-right",
+				width:10,
+				scalebarUnit: "dual"
+			});
+			function loadOverMap(basemap1){
+			i=i+1;
+			map=new esri.Map("map", {
+				center: [116.354524,39.996876],
+				zoom: 8,
+				basemap: basemap1.toString()
+			});
+			alert(map.getBasemap());
+			//鹰眼小地图 
+			//alert(dijit.byId("overviewMap"));
+			if(i!=1)
+			{
+			dijit.byId("over").destroy();
+			}
+			overviewMap = new esri.dijit.OverviewMap({
+				map: map,
+				visible: true,           // 初始化可见，默认为false  
+				attachTo: "bottom-left",   // 默认右上角  
+				width: 250,              // 默认值是地图高度的 1/4th  
+				height: 150,             // 默认值是地图高度的 1/4th   
+				opacity: 0.5,            // 透明度 默认0.5  
+				maximizeButton: true,    // 最大化,最小化按钮，默认false  
+				expandFactor: 2,         //概览地图和总览图上显示的程度矩形的大小之间的比例。默认值是2，这意味着概览地图将至少是两倍的大小的程度矩形。  
+				color: "#000000",         // 默认颜色为#000000  
+				id:"over"
+				})
+			overviewMap.startup();
+			//alert(dijit.byId("overviewMap").map.getBasemap());
+			
+			
+			}
+			
+			var b=on(map,"basemap-change",function(event){
+				var bg=event.target.getBasemap();
+				//alert(bg); 
+				loadOverMap(bg);
+			});
+			
+			<!-- var a=on(dijit.byId("BasemapToggle"),"toggle",function(){ -->
+			<!-- loadOverMap(dijit.byId("BasemapToggle").basemap) -->
+			<!-- }); -->
+			})
+
+			
+		
+
+</script>
+</head>
+<body>
+    <div id="map">
+        <div id="BasemapToggle"></div>
+        <div id="HomeButton"></div>
+		<div id="BasemapImagery"></div>
+    </div>
+</body>
+</html>
